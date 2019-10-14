@@ -1,0 +1,146 @@
+
+##############################################################
+# Finesse Model of TSRM with crystal
+#		
+##############################################################
+
+#################
+### Constants ###
+#################
+
+# Laser and modulation
+const Pin 	1			#Laser input power
+const fMod1 	123000000			#1st modulation frequency
+const midx1	0.01				#Modulation index
+
+####################################################################################
+
+
+
+##############
+### Optics ###
+##############
+
+
+# Input laser + modulation
+# ---------------------------------
+l Laser $Pin 0 nin
+s LaserToEOM 1m nin nEO1
+mod eom1 $fMod1 $midx1 1 pm nEO1 nEO2
+s EomToPoBS 1m nEO2 nBS1
+# ----------------------------------
+
+
+bs1 BS 0.5 0 0.0 45.0 nBS1 nBS2 nBS3 nBS4
+
+# Michelson IFO X-arm
+# ---------------------------------
+s LX 1.0035 nBS3 nEMx
+m1 EX 0.1 0.0 -45.0 nEMx ndump2
+attr EX Rcx 1.5
+attr EX Rcy 1.5
+# ----------------------------------
+
+# Michelson IFO Y-arm
+# ---------------------------------
+s LY 0.9965 nBS2 nEMy
+m1 EY 0.1 0.0 45.0 nEMy ndump3
+attr EY Rcx 1.5
+attr EY Rcy 1.5
+# ----------------------------------
+
+# Distance from BS to SRM1
+s lsr 0.21 nBS4 nSRM1
+# Signal recycling mirror SRM
+m SRM 0.9 0.1 45 nSRM1 nSRM2
+attr SRM Rc 2
+# ----------------------------------
+
+
+# Distance from SRM to TSR1
+s ltsr1 0.30 nSRM2 nTSR1a
+
+# Twin signal recycling cavity
+# ---------------------------------
+# TSRM1
+bs1 TSR1 0 0 0 2.1124 nTSR1a nTSR1b nTSR1c nTSR1d
+attr TSR1 Rc 1
+# Distance from TSR1 to TSR2
+s ltsr2 0.376 nTSR1b nTSR2a
+# TSRM2
+bs1 TSR2 0 0 0 -2.1124 nTSR2a nTSR2b nTSR2c nTSR2d
+attr TSR2 Rc -1.5
+
+s TSR2_crys 0.40498 nTSR2b nCRYS1a
+
+# The crystal
+# ---------------------------------
+m1 CRYS1 1 0 0 nCRYS1a nCRYS1b
+s sCRYS 0.010 1.8 nCRYS1b nCRYS2a 
+m1 CRYS2 1 0 0 nCRYS2a nCRYS2b
+# ----------------------------------
+
+# Distance from Crystal to TSRM
+s lcrys_tsrm 0.121 nCRYS2b nTSRM1
+# Twin Signal recycling mirror TSRM
+m TSRM 0.9 0.1 45.0 nTSRM1 nTSRM2
+attr TSRM Rc 6.667
+# ----------------------------------
+
+
+# Balanced Homodyne readout
+# ---------------------------------
+s sHD1 0 nTSRM2 nBDO4
+
+bs2 BS2 0.5 0 45 0 nBDO2o nBDO2i nBDO4 nBDO5    # T=1% 
+s l_homo 1n nBDO2i n_hbs
+l homody_lase 0.01 0 90 n_hbs
+# ----------------------------------
+
+####################################################################################
+%%% FTblock Photodiodes
+# Photodiodes and output optics
+
+
+# DC Photodiodes
+pd Px nBS3
+pd Py nBS2 
+pd Psrc nBS4 
+pd AS_Port nOut
+pd Pin nin*
+
+#RF Photodiodes
+pd1 pdrf1 $fMod1 0 nBS1
+pd1 pdrf2 $fMod1  nOut
+
+#Quantum noise Photodiodes
+qnoisedS S 1 $fs nOut
+
+
+# Amplitude detectors
+ad Xarm 0 nBS3
+ad Yarm 0 nBS2 
+ad SRCa 0 nBS4 
+
+ad Xarm_f1 $fMod1 nBS3
+ad Yarm_f1 $fMod1 nBS2 
+ad SRCa_f1 $fMod1 nBS4 
+
+
+%%% FTend Photodides
+
+####################################################################################
+# Cavity definitions
+cav cSRMX EX nEMx SRM nSRM1
+cav cSRMY EY nEMy SRM nSRM1
+
+cav cTSRM SRM nSRM2 TSRM nTSRM1
+
+maxtem 0
+phase 2
+
+
+
+# trace 10
+####################################################################################
+

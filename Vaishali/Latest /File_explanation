@@ -1,0 +1,6 @@
+File list :
+
+1. The file and notebook 06-October are outdated now - this design was for a single custom SRM to get the wasit in the crystal to 30u.
+2. The files with 11-October are the latest optimisation - this design includes a folded TSRC, along with a optimisation routine that checks the 
+   RoCs for the TSRC mirrors and also the distance between these optics to give us a 30u waist in the crystal
+3. The files with 14-October are checking if the values produced in the 11-October file are correct
